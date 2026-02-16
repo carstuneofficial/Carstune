@@ -1,8 +1,14 @@
+import { lazy, Suspense } from 'react'
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom'
 import { AppShell } from '@/app/shell/AppShell'
-import { ConfiguratorPage } from '@/app/views/ConfiguratorPage'
-import { ExportPage } from '@/app/views/ExportPage'
-import { ScanPage } from '@/app/views/ScanPage'
+
+const ScanPage = lazy(async () => ({ default: (await import('@/app/views/ScanPage')).ScanPage }))
+const ConfiguratorPage = lazy(async () => ({ default: (await import('@/app/views/ConfiguratorPage')).ConfiguratorPage }))
+const ExportPage = lazy(async () => ({ default: (await import('@/app/views/ExportPage')).ExportPage }))
+
+function PageFallback() {
+  return <div className="rounded-lg border border-border bg-card p-6 text-sm text-muted-foreground">Loading…</div>
+}
 
 const router = createBrowserRouter([
   {
@@ -10,9 +16,30 @@ const router = createBrowserRouter([
     element: <AppShell />,
     children: [
       { index: true, element: <Navigate to="/scan" replace /> },
-      { path: 'scan', element: <ScanPage /> },
-      { path: 'configurator', element: <ConfiguratorPage /> },
-      { path: 'export', element: <ExportPage /> },
+      {
+        path: 'scan',
+        element: (
+          <Suspense fallback={<PageFallback />}>
+            <ScanPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'configurator',
+        element: (
+          <Suspense fallback={<PageFallback />}>
+            <ConfiguratorPage />
+          </Suspense>
+        ),
+      },
+      {
+        path: 'export',
+        element: (
+          <Suspense fallback={<PageFallback />}>
+            <ExportPage />
+          </Suspense>
+        ),
+      },
       { path: '*', element: <Navigate to="/scan" replace /> },
     ],
   },
