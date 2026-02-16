@@ -65,7 +65,9 @@ export async function buildCutPdf(input: StickerExportInput) {
     const page = pdfDoc.addPage([mmToPt(210), mmToPt(80)])
     page.drawText('No stickers selected', { x: mmToPt(10), y: mmToPt(60), size: 18, font, color: rgb(0, 0, 0) })
     const bytes = await pdfDoc.save()
-    return new Blob([bytes], { type: 'application/pdf' })
+    const ab = new ArrayBuffer(bytes.byteLength)
+    new Uint8Array(ab).set(bytes)
+    return new Blob([ab], { type: 'application/pdf' })
   }
 
   for (const s of active) {
@@ -102,7 +104,9 @@ export async function buildCutPdf(input: StickerExportInput) {
   }
 
   const bytes = await pdfDoc.save()
-  return new Blob([bytes], { type: 'application/pdf' })
+  const ab = new ArrayBuffer(bytes.byteLength)
+  new Uint8Array(ab).set(bytes)
+  return new Blob([ab], { type: 'application/pdf' })
 }
 
 function mmToPt(mm: number) {
