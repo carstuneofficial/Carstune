@@ -2,7 +2,7 @@ import type { CarRecognitionResult, StickerSelection } from '@/shared/domain/car
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'
 
 export interface StickerExportInput {
-  modelId: string
+  carModelId: string
   recognition?: CarRecognitionResult
   stickers: StickerSelection[]
 }
@@ -35,8 +35,13 @@ export function buildCutSvg(input: StickerExportInput) {
     .join('\n')
 
   const meta = [
-    `Model ID: ${input.modelId}`,
-    input.recognition ? `${input.recognition.make} ${input.recognition.model} (${Math.round(input.recognition.confidence * 100)}%)` : 'No recognition metadata',
+    `Car model ID: ${input.carModelId}`,
+    input.recognition
+      ? `${input.recognition.make} ${input.recognition.model}${input.recognition.generation ? ` · ${input.recognition.generation}` : ''} (${Math.round(input.recognition.confidence * 100)}%)`
+      : 'No recognition metadata',
+    input.recognition?.dimensionsMm
+      ? `Dims(mm): ${input.recognition.dimensionsMm.lengthMm}×${input.recognition.dimensionsMm.widthMm}×${input.recognition.dimensionsMm.heightMm}`
+      : 'Dims(mm): —',
     `Generated: ${new Date().toISOString()}`,
   ].join(' · ')
 
@@ -94,7 +99,7 @@ export async function buildCutPdf(input: StickerExportInput) {
       font,
       color: rgb(0, 0, 0),
     })
-    page.drawText(`${s.widthMm}×${s.heightMm}mm · Model ${input.modelId}`, {
+    page.drawText(`${s.widthMm}×${s.heightMm}mm · Car model ${input.carModelId}`, {
       x,
       y: mmToPt(2),
       size: 8,

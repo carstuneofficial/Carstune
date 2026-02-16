@@ -4,6 +4,7 @@ import type {
   CarModelId,
   CarRecognitionResult,
   CoveringStyleId,
+  PreparedCarModelAsset,
   StickerOptionId,
   StickerZoneId,
   WheelStyleId,
@@ -11,7 +12,9 @@ import type {
 
 interface CarConfigStore extends CarCustomizationState {
   setRecognition: (result: CarRecognitionResult) => void
-  setModelId: (id: CarModelId) => void
+  setCarModelId: (id: CarModelId) => void
+  setScanSessionId: (id: string) => void
+  setPreparedModel: (asset: PreparedCarModelAsset) => void
   setCoveringStyle: (id: CoveringStyleId) => void
   setWheelStyle: (id: WheelStyleId) => void
   setStickerOption: (zone: StickerZoneId, option: StickerOptionId) => void
@@ -20,8 +23,10 @@ interface CarConfigStore extends CarCustomizationState {
 }
 
 const initialState: CarCustomizationState = {
-  modelId: undefined,
+  carModelId: undefined,
   recognition: undefined,
+  scanSessionId: undefined,
+  preparedModel: undefined,
   coveringStyle: 'gloss_black',
   wheelStyle: 'sport_5spoke',
   stickers: {
@@ -32,8 +37,10 @@ const initialState: CarCustomizationState = {
 
 export const useCarConfigStore = create<CarConfigStore>((set) => ({
   ...initialState,
-  setRecognition: (result) => set({ recognition: result, modelId: result.modelId }),
-  setModelId: (id) => set({ modelId: id }),
+  setRecognition: (result) => set({ recognition: result, carModelId: result.carModelId }),
+  setCarModelId: (id) => set({ carModelId: id }),
+  setScanSessionId: (id) => set({ scanSessionId: id }),
+  setPreparedModel: (asset) => set({ preparedModel: asset, carModelId: asset.carModelId, scanSessionId: asset.scanSessionId }),
   setCoveringStyle: (id) => set({ coveringStyle: id }),
   setWheelStyle: (id) => set({ wheelStyle: id }),
   setStickerOption: (zone, option) =>

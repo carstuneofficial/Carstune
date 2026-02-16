@@ -9,11 +9,12 @@ function InvalidateOnConfigChange() {
   const coveringStyle = useCarConfigStore((s) => s.coveringStyle)
   const wheelStyle = useCarConfigStore((s) => s.wheelStyle)
   const stickers = useCarConfigStore((s) => s.stickers)
-  const modelId = useCarConfigStore((s) => s.modelId)
+  const carModelId = useCarConfigStore((s) => s.carModelId)
+  const preparedUrl = useCarConfigStore((s) => s.preparedModel?.glbUrl)
 
   useEffect(() => {
     invalidate()
-  }, [invalidate, coveringStyle, wheelStyle, stickers, modelId])
+  }, [invalidate, coveringStyle, wheelStyle, stickers, carModelId, preparedUrl])
 
   return null
 }

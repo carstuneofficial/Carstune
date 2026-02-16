@@ -77,7 +77,7 @@ export const CAR_MODELS: Record<CarModelId, CarModelSpec> = {
   },
 }
 
-export function getCarModelSpec(id: CarModelId): CarModelSpec {
-  return CAR_MODELS[id]
+export function getCarModelSpec(id: CarModelId): CarModelSpec | undefined {
+  return (CAR_MODELS as Record<string, CarModelSpec | undefined>)[id]
 }
 

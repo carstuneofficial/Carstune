@@ -6,12 +6,17 @@ import { createCoveringMaterial } from '@/features/car3d/lib/coveringMaterials'
 import { StickerDecals } from '@/features/car3d/components/StickerDecals'
 import { WheelSet } from '@/features/car3d/components/WheelSet'
 import { useCarConfigStore } from '@/shared/store/useCarConfigStore'
+import type { PreparedCarModelAsset } from '@/shared/domain/car'
 
-export function CarModel({ spec }: { spec: CarModelSpec }) {
+export function CarModel({ spec, prepared }: { spec?: CarModelSpec; prepared?: PreparedCarModelAsset }) {
   const coveringStyle = useCarConfigStore((s) => s.coveringStyle)
-  const { scene } = useGLTF(spec.glbUrl, '/draco/')
+  const glbUrl = prepared?.glbUrl ?? spec?.glbUrl
+  if (!glbUrl) {
+    throw new Error('No GLB URL available for CarModel')
+  }
+  const { scene } = useGLTF(glbUrl, '/draco/')
 
-  const bodyMeshes = useMemo(() => findBodyMeshes(scene, spec.bodyMeshNames), [scene, spec.bodyMeshNames])
+  const bodyMeshes = useMemo(() => findBodyMeshes(scene, spec?.bodyMeshNames), [scene, spec?.bodyMeshNames])
 
   const coveringMaterial = useMemo(() => createCoveringMaterial(coveringStyle), [coveringStyle])
 
@@ -44,7 +49,9 @@ export function CarModel({ spec }: { spec: CarModelSpec }) {
   return (
     <group>
       <primitive object={scene} />
-      {decalTarget ? <StickerDecals spec={spec} targetMesh={decalTarget} anchorRoot={scene} /> : null}
+      {decalTarget ? (
+        <StickerDecals spec={spec} anchorOverrides={prepared?.anchors} targetMesh={decalTarget} anchorRoot={scene} />
+      ) : null}
       <WheelSet />
     </group>
   )

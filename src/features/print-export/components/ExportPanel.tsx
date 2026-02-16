@@ -9,8 +9,9 @@ import { Separator } from '@/shared/ui/separator'
 
 export function ExportPanel() {
   const navigate = useNavigate()
-  const modelId = useCarConfigStore((s) => s.modelId) ?? 'demo/hatchback'
+  const carModelId = useCarConfigStore((s) => s.carModelId) ?? 'demo/hatchback'
   const recognition = useCarConfigStore((s) => s.recognition)
+  const prepared = useCarConfigStore((s) => s.preparedModel)
   const stickers = useCarConfigStore((s) => Object.values(s.stickers))
   const [busy, setBusy] = useState(false)
 
@@ -25,12 +26,20 @@ export function ExportPanel() {
         </CardHeader>
         <CardContent className="grid gap-3">
           <div className="text-sm">
-            <div className="text-muted-foreground">Model ID</div>
-            <div className="font-mono">{modelId}</div>
+            <div className="text-muted-foreground">Car model ID</div>
+            <div className="font-mono">{carModelId}</div>
           </div>
           <div className="text-sm">
             <div className="text-muted-foreground">Recognition metadata</div>
-            <div>{recognition ? `${recognition.make} ${recognition.model} (${Math.round(recognition.confidence * 100)}%)` : '—'}</div>
+            <div>
+              {recognition ? `${recognition.make} ${recognition.model}${recognition.generation ? ` · ${recognition.generation}` : ''} (${Math.round(recognition.confidence * 100)}%)` : '—'}
+            </div>
+            {recognition?.dimensionsMm ? (
+              <div className="font-mono text-xs text-muted-foreground">
+                dims: {recognition.dimensionsMm.lengthMm}×{recognition.dimensionsMm.widthMm}×{recognition.dimensionsMm.heightMm}mm
+              </div>
+            ) : null}
+            {prepared ? <div className="font-mono text-xs text-muted-foreground">pipeline: {prepared.pipeline}</div> : null}
           </div>
           <Separator />
 
@@ -61,8 +70,8 @@ export function ExportPanel() {
             <Button
               disabled={busy}
               onClick={() => {
-                const svg = buildCutSvg({ modelId, recognition, stickers })
-                downloadText(`carstune-cut-${modelId}.svg`, svg, 'image/svg+xml;charset=utf-8')
+                const svg = buildCutSvg({ carModelId, recognition, stickers })
+                downloadText(`carstune-cut-${carModelId}.svg`, svg, 'image/svg+xml;charset=utf-8')
               }}
             >
               Download SVG
@@ -72,8 +81,8 @@ export function ExportPanel() {
               onClick={async () => {
                 setBusy(true)
                 try {
-                  const pdfBlob = await buildCutPdf({ modelId, recognition, stickers })
-                  downloadBlob(`carstune-cut-${modelId}.pdf`, pdfBlob)
+                  const pdfBlob = await buildCutPdf({ carModelId, recognition, stickers })
+                  downloadBlob(`carstune-cut-${carModelId}.pdf`, pdfBlob)
                 } finally {
                   setBusy(false)
                 }

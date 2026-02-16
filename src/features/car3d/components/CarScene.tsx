@@ -1,11 +1,9 @@
-import { useMemo } from 'react'
-import { getCarModelSpec } from '@/features/car3d/db/carModels'
 import { CarModelRenderer } from '@/features/car3d/components/CarModelRenderer'
-import { useCarConfigStore } from '@/shared/store/useCarConfigStore'
+import { useActiveCarModel } from '@/features/car3d/hooks/useActiveCarModel'
 
 export function CarScene() {
-  const modelId = useCarConfigStore((s) => s.modelId) ?? 'demo/hatchback'
-  const spec = useMemo(() => getCarModelSpec(modelId), [modelId])
+  const { spec, prepared } = useActiveCarModel()
+  const t = prepared?.transform
 
   return (
     <group>
@@ -20,7 +18,13 @@ export function CarScene() {
       </mesh>
 
       <group position={[0, -0.45, 0]}>
-        <CarModelRenderer spec={spec} />
+        <group
+          position={t?.position ?? [0, 0, 0]}
+          rotation={t?.rotationEuler ?? [0, 0, 0]}
+          scale={(t?.scale as any) ?? 1}
+        >
+          <CarModelRenderer spec={spec} prepared={prepared} />
+        </group>
       </group>
     </group>
   )

@@ -2,8 +2,8 @@
 
 Production-grade starter for an **AI car tuning configurator**:
 
-- **Scan flow**: user uploads photos → AI vision returns stable `modelId` (make/model)  
-- **3D configurator**: app loads a **pre-existing** parametric GLB by `modelId` (no photo-generated geometry)  
+- **Scan flow**: user uploads photos → AI vision returns stable `carModelId` + approximate dimensions  
+- **3D configurator**: app loads a **prepared** GLB (aligned/scaled from a base parametric model) by `carModelId`  
 - **Customization**: covering (material swap), wheels (variant swap), stickers (decal projection)  
 - **Print export**: SVG/PDF cut outlines with **exact millimeter** dimensions
 
@@ -44,6 +44,16 @@ npm install
 npm run dev
 ```
 
+### Enable AI backend (optional)
+
+Set `VITE_API_BASE_URL` to point at your backend:
+
+```bash
+VITE_API_BASE_URL=http://localhost:8000 npm run dev
+```
+
+A FastAPI placeholder backend is included under `backend/`.
+
 ## 3D models (GLB)
 
 This repo intentionally does **not** ship large binary assets.
@@ -70,5 +80,6 @@ If your GLB is Draco-compressed, copy the Draco decoder files into `public/draco
 
 ## Notes
 
-- The recognition step in `src/features/recognition/api/recognizeCar.ts` is a **mock**. In production it should call your backend vision system and return a stable `modelId`.
-- The export step is a minimal example. Production implementations usually connect `modelId` to **CAD/UV templates** to generate true cutting paths.
+- The recognition step in `src/features/recognition/api/recognizeCar.ts` falls back to a **mock** if the backend is unreachable.
+- The “prepared model” step (`/v1/models/prepare`) is where you implement **parametric alignment** and **AI anchor generation** for decals.
+- The export step is a minimal example. Production implementations usually connect `carModelId` to **CAD/UV templates** to generate true cutting paths.
